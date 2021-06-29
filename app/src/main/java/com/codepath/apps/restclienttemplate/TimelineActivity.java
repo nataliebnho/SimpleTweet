@@ -1,5 +1,6 @@
 package com.codepath.apps.restclienttemplate;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +20,7 @@ import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.parceler.Parcels;
 
 import java.lang.annotation.Target;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ import okhttp3.Headers;
 public class TimelineActivity extends AppCompatActivity {
 
     public static final String TAG = "TimelineActivity";
+    private final int REQUEST_CODE = 20;
 
     TwitterClient client;
     RecyclerView rvTweets;
@@ -77,10 +80,28 @@ public class TimelineActivity extends AppCompatActivity {
             //Compose icon has been selected
             // Navigate to compose activity
             Intent i = new Intent(this, ComposeActivity.class);
-            startActivity(i);
+            startActivityForResult(i, REQUEST_CODE);
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        //resultCode is defined by Android
+        //data is what we pass back from the child activity
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            //Get data from intent (tweet)
+            Tweet tweet = Parcels.unwrap(data.getParcelableExtra("tweet"));
+            // update recyclerview from this new tweet
+            //Modify data source
+            //add new tweet at position 0
+            tweets.add(0, tweet);
+            //Update the adapter
+            adapter.notifyItemInserted(0);
+            rvTweets.smoothScrollToPosition(0);
+        }
+        super.onActivityResult(REQUEST_CODE, resultCode, data);
     }
 
     private void populateHomeTimeline() {

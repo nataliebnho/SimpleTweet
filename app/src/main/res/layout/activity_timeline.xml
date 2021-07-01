@@ -7,23 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".TimelineActivity">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/swipeContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvTweets"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="0dp" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
 
     <Button
         android:id="@+id/btnLogOut"
@@ -32,4 +15,26 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:text="Log Out" />
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/btnLogOut"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="0dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTweets"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp" >
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 </RelativeLayout>

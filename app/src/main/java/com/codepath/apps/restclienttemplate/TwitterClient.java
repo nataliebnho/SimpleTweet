@@ -2,6 +2,7 @@ package com.codepath.apps.restclienttemplate;
 
 import android.content.Context;
 
+import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.asynchttpclient.RequestParams;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 import com.codepath.oauth.OAuthBaseClient;
@@ -50,6 +51,7 @@ public class TwitterClient extends OAuthBaseClient {
 		RequestParams params = new RequestParams();
 		params.put("count", 25);
 		params.put("since_id", 1);
+		params.put("tweet_mode", "extended");
 		client.get(apiUrl, params, handler);
 	}
 
@@ -60,6 +62,22 @@ public class TwitterClient extends OAuthBaseClient {
 		params.put("status", tweetContent);
 		client.post(apiUrl, params, "", handler);
 	}
+
+	public void likeTweet(String tweetID, JsonHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("favorites/create.json");
+		RequestParams params = new RequestParams();
+		params.put("id", tweetID);
+		client.post(apiUrl, params, "", handler);
+	}
+
+	public void unlikeTweet(String tweetID, JsonHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("favorites/destroy.json");
+		RequestParams params = new RequestParams();
+		params.put("id", tweetID);
+		client.post(apiUrl, params, "", handler);
+	}
+
+	// create async calls (post likes)
 
 	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
 	 * 	  i.e getApiUrl("statuses/home_timeline.json");

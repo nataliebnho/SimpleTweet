@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -16,8 +17,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.like.LikeButton;
+import com.like.OnLikeListener;
 
 import org.jetbrains.annotations.NotNull;
+import org.parceler.Parcel;
+import org.parceler.Parcels;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,9 +69,6 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     public int getItemCount() {
         return tweets.size();
     }
-    // Pass in the context and list of tweets
-    // For each row, inflate a layout
-    // Bind values based on the position of the element
 
     // Define a ViewHolder
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -75,6 +77,8 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         TextView tvBody;
         TextView tvScreenName;
         TextView tvRelativeDate;
+        Button ibLike;
+
 
         public ViewHolder(@Nonnull View itemView) {
             super(itemView);
@@ -83,23 +87,34 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvScreenName = itemView.findViewById(R.id.tvScreenName);
             tvRelativeDate = itemView.findViewById(R.id.tvRelativeDate);
             ivMedia = itemView.findViewById(R.id.ivMedia);
+            ibLike = itemView.findViewById(R.id.ibLike);
+
+            itemView.setOnClickListener(this);
         }
 
-        public void bind(Tweet tweet) {
+        public void bind(final Tweet tweet) {
             tvBody.setText(tweet.body);
             tvScreenName.setText(tweet.user.screenName);
             tvRelativeDate.setText(getRelativeTimeAgo(tweet.createdAt));
             Glide.with(context).load(tweet.user.profileImageUrl).into(ivProfileImage);
             Glide.with(context).load(tweet.mediaUrl).into(ivMedia);
-        }
 
+            // Handle which picture to load
+            if(tweet.favorited == true){
+                ibLike.setBackground(context.getDrawable(R.drawable.ic_vector_heart));
+
+            } else {
+                ibLike.setBackground(context.getDrawable(R.drawable.ic_vector_heart_stroke));
+            }
+        }
 
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();
             Tweet tweet = tweets.get(position);
-            //Intent i = new Intent(context, tweetDetailsActivity.class);
-
+            Intent i = new Intent(context, tweetDetailsActivity.class);
+            i.putExtra("tweet", Parcels.wrap(tweet));
+            context.startActivity(i);
         }
     }
 

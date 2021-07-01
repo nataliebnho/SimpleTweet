@@ -23,7 +23,7 @@ import okhttp3.Headers;
 public class ComposeActivity extends AppCompatActivity {
 
     public static final String TAG = "ComposeActivity";
-    public static final int MAX_TWEET_LENGTH = 140;
+    public static final int MAX_TWEET_LENGTH = 280;
 
     EditText etCompose;
     Button btnTweet;
@@ -36,9 +36,6 @@ public class ComposeActivity extends AppCompatActivity {
 
         etCompose = findViewById(R.id.etCompose);
         btnTweet = findViewById(R.id.btnTweet);
-
-        // Set Click Listener on button
-
         client = TwitterApp.getRestClient(this);
 
         btnTweet.setOnClickListener(new View.OnClickListener() {
@@ -54,7 +51,7 @@ public class ComposeActivity extends AppCompatActivity {
                     Toast.makeText(ComposeActivity.this, "Sorry, your tweet is too long", Toast.LENGTH_LONG).show();
                     return;
                 }
-                //Make API call to twitter to publish the tweet
+                //Make API call to Twitter to publish the tweet
                 client.publishTweet(tweetContent, new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Headers headers, JSON json) {
@@ -63,12 +60,13 @@ public class ComposeActivity extends AppCompatActivity {
                             Tweet tweet = Tweet.fromJson(json.jsonObject);
                             Log.i(TAG, "Published tweet says: " + tweet.body);
                             Intent intent = new Intent();
-                            //to pass an entire tweet object back, must make tweet Parceable
+                            //to pass an entire tweet object back, make tweet Parceable
                             intent.putExtra("tweet", Parcels.wrap(tweet));
                             setResult(RESULT_OK, intent);
                             finish();
                         } catch (JSONException e) {
                             e.printStackTrace();
+                            Log.e(TAG, "onFailure", e);
                         }
                     }
                     @Override

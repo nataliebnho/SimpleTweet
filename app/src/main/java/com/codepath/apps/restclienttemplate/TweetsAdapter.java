@@ -1,27 +1,25 @@
 package com.codepath.apps.restclienttemplate;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.codepath.apps.restclienttemplate.models.Tweet;
-import com.like.LikeButton;
-import com.like.OnLikeListener;
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 import org.jetbrains.annotations.NotNull;
-import org.parceler.Parcel;
 import org.parceler.Parcels;
 
 import java.text.ParseException;
@@ -33,9 +31,9 @@ import javax.annotation.Nonnull;
 
 public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder>{
 
-    // Pass in the context and list of tweets
     Context context;
     List<Tweet> tweets;
+
     private static final int SECOND_MILLIS = 1000;
     private static final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
     private static final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
@@ -46,7 +44,6 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         this.tweets = tweets;
     }
 
-    //For each row, inflate the layout
     @NonNull
     @NotNull
     @Override
@@ -55,22 +52,17 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         return new ViewHolder(view);
     }
 
-    //Bind values based on the position of the element
     @Override
     public void onBindViewHolder(@NonNull @NotNull ViewHolder holder, int position) {
-        // Get the data at position
         Tweet tweet = tweets.get(position);
-        //Bind the tweet w the view holder
         holder.bind(tweet);
     }
 
-    //return item count
     @Override
     public int getItemCount() {
         return tweets.size();
     }
 
-    // Define a ViewHolder
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         ImageView ivProfileImage;
         ImageView ivMedia;
@@ -78,7 +70,8 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         TextView tvScreenName;
         TextView tvRelativeDate;
         Button ibLike;
-
+        TextView tvNumLikes;
+        TextView tvNumRetweets;
 
         public ViewHolder(@Nonnull View itemView) {
             super(itemView);
@@ -88,6 +81,8 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvRelativeDate = itemView.findViewById(R.id.tvRelativeDate);
             ivMedia = itemView.findViewById(R.id.ivMedia);
             ibLike = itemView.findViewById(R.id.ibLike);
+            tvNumLikes = itemView.findViewById(R.id.tvNumLikes);
+            tvNumRetweets = itemView.findViewById(R.id.tvNumRetweets);
 
             itemView.setOnClickListener(this);
         }
@@ -96,15 +91,19 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvBody.setText(tweet.body);
             tvScreenName.setText(tweet.user.screenName);
             tvRelativeDate.setText(getRelativeTimeAgo(tweet.createdAt));
-            Glide.with(context).load(tweet.user.profileImageUrl).into(ivProfileImage);
-            Glide.with(context).load(tweet.mediaUrl).into(ivMedia);
+            tvNumLikes.setText(String.valueOf(tweet.favorite_count));
+            tvNumRetweets.setText(String.valueOf(tweet.retweet_count));
 
-            // Handle which picture to load
-            if(tweet.favorited == true){
+            Glide.with(context).load(tweet.user.profileImageUrl).transform(new CircleCrop()).into(ivProfileImage);
+
+            int radius = 30; // corner radius, higher value = more rounded
+            int margin = 10; // crop margin, set to 0 for corners with no crop
+            Glide.with(context).load(tweet.mediaUrl).fitCenter().transform(new RoundedCornersTransformation(radius, margin)).into(ivMedia);
+
+            if(tweet.favorited){
                 ibLike.setBackground(context.getDrawable(R.drawable.ic_vector_heart));
-
             } else {
-                ibLike.setBackground(context.getDrawable(R.drawable.ic_vector_heart_stroke));
+                ibLike.setBackground(context.getDrawable(R.drawable.ic_vector_heart_stroke)); //empty heart
             }
         }
 
@@ -114,11 +113,11 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             Tweet tweet = tweets.get(position);
             Intent i = new Intent(context, tweetDetailsActivity.class);
             i.putExtra("tweet", Parcels.wrap(tweet));
-            context.startActivity(i);
+            i.putExtra("position", position);
+            ((Activity) context).startActivityForResult(i, TimelineActivity.DETAIL_REQUEST);
         }
     }
 
-    // getRelativeTimeAgo("Mon Apr 01 21:16:23 +0000 2014");
     public String getRelativeTimeAgo(String rawJsonDate) {
 
         String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
@@ -153,18 +152,14 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         return "";
     }
 
-    // Clean all elements of the recycler
     public void clear() {
         tweets.clear();
         notifyDataSetChanged();
     }
 
-    // Add a list of items -- change to type used
     public void addAll(List<Tweet> list) {
         tweets.addAll(list);
         notifyDataSetChanged();
     }
-
-
 
 }

@@ -35,6 +35,7 @@ import okhttp3.Headers;
 public class TimelineActivity extends AppCompatActivity {
 
     public static final String TAG = "TimelineActivity";
+    public static final int DETAIL_REQUEST = 30;
     private final int REQUEST_CODE = 20;
 
     TwitterClient client;
@@ -51,14 +52,11 @@ public class TimelineActivity extends AppCompatActivity {
         setContentView(R.layout.activity_timeline);
 
         client = TwitterApp.getRestClient(this);
-
-        // Find the recycler view
         rvTweets = findViewById(R.id.rvTweets);
-        // Init the list of tweets and adapter
         tweets = new ArrayList<>();
         adapter = new TweetsAdapter(this, tweets);
-        // Recycler view setup: layout manager and the adapter
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+
         rvTweets.setLayoutManager(linearLayoutManager);
         rvTweets.setAdapter(adapter);
 
@@ -109,40 +107,7 @@ public class TimelineActivity extends AppCompatActivity {
 
     }
 
-//    // Append the next page of data into the adapter
-//    // This method probably sends out a network request and appends new data items to your adapter.
-//    public void loadNextDataFromApi(int offset) {
-//        // Send an API request to retrieve appropriate paginated data
-//        client.getHomeTimeline(new JsonHttpResponseHandler() {
-//            @Override
-//            public void onSuccess(int statusCode, Headers headers, JSON json) {
-//                JSONArray jsonArray = json.jsonArray;
-//                try {
-//                    tweets.addAll(Tweet.fromJSONArray(jsonArray));
-//                    adapter.notifyItemRangeChanged();
-//                } catch (JSONException e) {
-//                    Log.e(TAG, "Json exception", e);
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-//                Log.d("DEBUG", "Fetch timeline error: " + throwable.toString());
-//            }
-//
-//        });
-//        //  --> Send the request including an offset value (i.e `page`) as a query parameter.
-//
-//        //  --> Deserialize and construct new model objects from the API response
-//        //  --> Append the new data objects to the existing set of items inside the array of items
-//        //  --> Notify the adapter of the new items made with `notifyItemRangeInserted()`
-//    }
-
     public void fetchTimelineAsync(int page) {
-        // Send the network request to fetch the updated data
-        // `client` here is an instance of Android Async HTTP
-        // getHomeTimeline is an example endpoint.
         client.getHomeTimeline(new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
@@ -158,7 +123,6 @@ public class TimelineActivity extends AppCompatActivity {
                     Log.e(TAG, "Json exception", e);
                     e.printStackTrace();
                 }
-                // Now we call setRefreshing(false) to signal refresh has finished
                 swipeContainer.setRefreshing(false);
             }
 
@@ -179,8 +143,6 @@ public class TimelineActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.compose) {
-            //Compose icon has been selected
-            // Navigate to compose activity
             Intent i = new Intent(this, ComposeActivity.class);
             startActivityForResult(i, REQUEST_CODE);
             return true;
@@ -189,19 +151,21 @@ public class TimelineActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         //resultCode is defined by Android
-        //data is what we pass back from the child activity
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            //Get data from intent (tweet)
             Tweet tweet = Parcels.unwrap(data.getParcelableExtra("tweet"));
-            // update recyclerview from this new tweet
-            //Modify data source
-            //add new tweet at position 0
             tweets.add(0, tweet);
-            //Update the adapter
             adapter.notifyItemInserted(0);
             rvTweets.smoothScrollToPosition(0);
+        }
+
+        if(requestCode == DETAIL_REQUEST && resultCode == RESULT_OK){
+            int position = data.getExtras().getInt("position");
+            Tweet modifiedTweet = Parcels.unwrap(data.getExtras().getParcelable("modifiedTweet"));
+            tweets.remove(position);
+            tweets.add(position, modifiedTweet);
+            adapter.notifyItemChanged(position);
         }
         super.onActivityResult(REQUEST_CODE, resultCode, data);
     }

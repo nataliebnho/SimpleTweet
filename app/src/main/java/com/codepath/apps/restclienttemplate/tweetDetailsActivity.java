@@ -2,7 +2,9 @@ package com.codepath.apps.restclienttemplate;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -11,13 +13,13 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.codepath.apps.restclienttemplate.models.Tweet;
-import com.like.LikeButton;
 
 import org.parceler.Parcels;
 
 public class tweetDetailsActivity extends AppCompatActivity {
 
     Tweet tweet;
+    int position;
 
     TextView tvUserName;
     TextView tvUserHandle;
@@ -27,8 +29,6 @@ public class tweetDetailsActivity extends AppCompatActivity {
 
     TextView tvLikeCount;
     TextView tvRetweetCount;
-
-    LikeButton likeButton;
 
     TwitterClient client;
 
@@ -53,7 +53,7 @@ public class tweetDetailsActivity extends AppCompatActivity {
 
         client = TwitterApp.getRestClient(this);
 
-        tweet = (Tweet) Parcels.unwrap(getIntent().getParcelableExtra("tweet"));
+        tweet = Parcels.unwrap(getIntent().getParcelableExtra("tweet"));
 
         Log.d("MovieDetailsActivity", String.format("Showing details for %s", tweet.getId()));
 
@@ -66,49 +66,55 @@ public class tweetDetailsActivity extends AppCompatActivity {
         Glide.with(this).load(tweet.user.profileImageUrl).into(ivProfile);
         Glide.with(this).load(tweet.mediaUrl).into(ivTweetMedia);
 
-        if(tweet.favorited == false){
+        if(!tweet.favorited){
             ibLike.setBackground(getDrawable(R.drawable.ic_vector_heart_stroke));
         } else {
             ibLike.setBackground(getDrawable(R.drawable.ic_vector_heart));
         }
 
-        // -----------------------------------------------
-
         ibLike.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(tweet.favorited == false){
-                    //call to unlike
+                if (!tweet.favorited){
                     tweet.like(client);
-//                  //update favorite status
                     tweet.favorited = true;
-                    //update count of likes
-                    //tweet.favorite_count += 1;
-                    tvLikeCount.setText((tweet.favorite_count + 1) + " likes");
-                    //change Buttons
-                    ibLike.setBackground(getDrawable(R.drawable.ic_vector_heart));
+                    tweet.favorite_count += 1;
+                    tvLikeCount.setText(tweet.favorite_count + " likes");
                 }
                 else {
-                    // Call to unlike
                     tweet.unlike(client);
-                    // Update favorite status
                     tweet.favorited = false;
-                    // updates count of likes
-                    //tweet.favorite_count -= 1;
-                    tvLikeCount.setText((tweet.favorite_count -1) + " likes");
-                    // changebuttons
-                    ibLike.setBackground(getDrawable(R.drawable.ic_vector_heart_stroke));
+                    tweet.favorite_count -= 1;
+                    tvLikeCount.setText(tweet.favorite_count + " likes");
                 }
+                changeButtons();
+                return;
             }
         });
 
-        // -----------------------------------------------
-
+        position = getIntent().getIntExtra("position", -1);
+        Log.d("Position in detail: ", String.valueOf(position));
     }
 
     public void changeButtons(){
-        // if like is ture
+        if (tweet.favorited){
+            ibLike.setBackground(getDrawable(R.drawable.ic_vector_heart));
+        } else {
+            ibLike.setBackground(getDrawable(R.drawable.ic_vector_heart_stroke));
+        }
+    }
 
-        // else
+    public void goToTimeline(){
+        Intent i = new Intent();
+        i.putExtra("position", position);
+        i.putExtra("modifiedTweet", Parcels.wrap(tweet));
+        setResult(RESULT_OK, i);
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        goToTimeline();
+        super.onBackPressed();
     }
 }

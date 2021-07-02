@@ -72,6 +72,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         Button ibLike;
         TextView tvNumLikes;
         TextView tvNumRetweets;
+        Button ibRetweet;
 
         public ViewHolder(@Nonnull View itemView) {
             super(itemView);
@@ -83,6 +84,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             ibLike = itemView.findViewById(R.id.ibLike);
             tvNumLikes = itemView.findViewById(R.id.tvNumLikes);
             tvNumRetweets = itemView.findViewById(R.id.tvNumRetweets);
+            ibRetweet = itemView.findViewById(R.id.btnRetweet);
 
             itemView.setOnClickListener(this);
         }
@@ -100,10 +102,16 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             int margin = 10; // crop margin, set to 0 for corners with no crop
             Glide.with(context).load(tweet.mediaUrl).fitCenter().transform(new RoundedCornersTransformation(radius, margin)).into(ivMedia);
 
-            if(tweet.favorited){
+            if (tweet.favorited){
                 ibLike.setBackground(context.getDrawable(R.drawable.ic_vector_heart));
             } else {
                 ibLike.setBackground(context.getDrawable(R.drawable.ic_vector_heart_stroke)); //empty heart
+            }
+
+            if(tweet.retweeted){
+                ibRetweet.setBackground(context.getDrawable(R.drawable.ic_vector_retweet));
+            } else {
+                ibRetweet.setBackground(context.getDrawable(R.drawable.ic_vector_retweet_stroke)); //empty heart
             }
         }
 

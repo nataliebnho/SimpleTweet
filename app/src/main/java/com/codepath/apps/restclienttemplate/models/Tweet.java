@@ -116,6 +116,36 @@ public class Tweet {
 
     }
 
+    public void retweet(TwitterClient client) {
+        client.retweet(getId(), new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                Log.i("TWEET", "Tweet successfully retweeted");
+            }
+
+            @Override
+            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                Log.e(TAG, "Tweet not retweeted: " + String.valueOf(getId()), throwable);
+            }
+        });
+    }
+
+    public void unretweet(TwitterClient client) {
+        client.unretweet(getId(), new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                Log.i("TWEET", "Tweet successfully unretweeted");
+            }
+
+            @Override
+            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                Log.e(TAG, "Tweet not unretweeted: " + String.valueOf(getId()), throwable);
+            }
+        });
+    }
+
+
+
 
 
 }

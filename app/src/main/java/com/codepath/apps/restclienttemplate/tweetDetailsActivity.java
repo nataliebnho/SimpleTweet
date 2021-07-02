@@ -33,8 +33,7 @@ public class tweetDetailsActivity extends AppCompatActivity {
     TwitterClient client;
 
     Button ibLike;
-    int favorite_count;
-    boolean internal_favorite;
+    Button ibRetweet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +46,7 @@ public class tweetDetailsActivity extends AppCompatActivity {
         ivProfile = findViewById(R.id.ivProfile);
         ivTweetMedia = findViewById(R.id.ivTweetMedia);
         ibLike = findViewById(R.id.ibLike);
+        ibRetweet = findViewById(R.id.btnRetweetDetail);
 
         tvLikeCount = findViewById(R.id.tvLikes);
         tvRetweetCount = findViewById(R.id.tvRetweets);
@@ -72,6 +72,12 @@ public class tweetDetailsActivity extends AppCompatActivity {
             ibLike.setBackground(getDrawable(R.drawable.ic_vector_heart));
         }
 
+        if(!tweet.retweeted){
+            ibRetweet.setBackground(getDrawable(R.drawable.ic_vector_retweet_stroke));
+        } else {
+            ibRetweet.setBackground(getDrawable(R.drawable.ic_vector_retweet));
+        }
+
         ibLike.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -87,20 +93,48 @@ public class tweetDetailsActivity extends AppCompatActivity {
                     tweet.favorite_count -= 1;
                     tvLikeCount.setText(tweet.favorite_count + " likes");
                 }
-                changeButtons();
+                changeLikeButtons();
                 return;
             }
         });
 
+
+        ibRetweet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!tweet.retweeted){
+                    tweet.retweet(client);
+                    tweet.retweeted = true;
+                    tweet.retweet_count += 1;
+                    tvRetweetCount.setText(tweet.retweet_count + " retweets");
+                }
+                else {
+                    tweet.unretweet(client);;
+                    tweet.favorited = false;
+                    tweet.favorite_count -= 1;
+                    tvRetweetCount.setText(tweet.retweet_count + " retweets");
+                }
+                changeRetweetButtons();
+                return;
+            }
+        });
         position = getIntent().getIntExtra("position", -1);
         Log.d("Position in detail: ", String.valueOf(position));
     }
 
-    public void changeButtons(){
+    public void changeLikeButtons(){
         if (tweet.favorited){
             ibLike.setBackground(getDrawable(R.drawable.ic_vector_heart));
         } else {
             ibLike.setBackground(getDrawable(R.drawable.ic_vector_heart_stroke));
+        }
+    }
+
+    public void changeRetweetButtons(){
+        if (tweet.retweeted){
+            ibRetweet.setBackground(getDrawable(R.drawable.ic_vector_retweet));
+        } else {
+            ibRetweet.setBackground(getDrawable(R.drawable.ic_vector_retweet_stroke));
         }
     }
 

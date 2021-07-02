@@ -33,7 +33,7 @@ The following **optional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='https://github.com/nataliebnho/SimpleTweet/blob/master/walkthroughSimpleTwitterFINAL.gif' />
+<img src='https://github.com/nataliebnho/SimpleTweet/blob/master/walkthroughSimpleTwitterFINAL3.gif' />
 
 GIF created with [Kap](https://getkap.co/).
 
